@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Detect whether the computer is a Dell XPS 14 2026 with the OLED panel.
+
+grep -qx "XPS 14 DA14260" /sys/class/dmi/id/product_name 2>/dev/null &&
+  strings -n 4 /sys/class/drm/card*-eDP-*/edid 2>/dev/null | grep -qx "140WT2"

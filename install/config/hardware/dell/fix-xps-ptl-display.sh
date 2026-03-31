@@ -1,16 +1,15 @@
-# Fix display issues on Dell XPS 2026+ with LG OLED panel and Intel Panther Lake (Xe3) GPU.
+# Fix display issues on Dell XPS 14 2026 with the OLED panel and Intel Panther Lake (Xe3) GPU.
 # Panel Replay causes the screen to feel like it runs at 10hz.
-if omarchy-hw-match "XPS" \
-  && omarchy-hw-intel-ptl \
-  && test "$(od -An -tx1 -j8 -N2 /sys/class/drm/card*-eDP-*/edid 2>/dev/null | tr -d ' \n')" = "30e4"; then
+if omarchy-hw-xps-14-oled \
+  && omarchy-hw-intel-ptl; then
 
-  echo "Detected Dell XPS with LG OLED panel on Panther Lake, disabling Xe Panel Replay..."
+  echo "Detected Dell XPS 14 with OLED panel on Panther Lake, disabling Xe Panel Replay..."
 
   CMDLINE='KERNEL_CMDLINE[default]+=" xe.enable_panel_replay=0"'
 
   sudo mkdir -p /etc/limine-entry-tool.d
   cat <<EOF | sudo tee /etc/limine-entry-tool.d/dell-xps-ptl-display.conf >/dev/null
-# Fix Dell XPS OLED display issues by disabling Xe Panel Replay only
+# Fix Dell XPS 14 OLED display issues by disabling Xe Panel Replay only
 $CMDLINE
 EOF
 
