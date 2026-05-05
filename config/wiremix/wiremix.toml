@@ -3,3 +3,8 @@
 
 [char_sets.default]
 default_device = "⮞"
+
+[[names.overrides]]
+types = [ "endpoint" ]
+matches = [ { "node:alsa.driver_name" = "snd_soc_sof_sdw", "node:alsa.long_card_name" = "~DellInc\\.-XPS.*" } ]
+templates = [ "{node:node.description}" ]
