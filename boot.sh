@@ -1,5 +1,15 @@
 #!/bin/bash
 
+set -e
+
+# The online bootstrap rewrites mirrors, upgrades packages, and replaces the
+# existing checkout. Never begin those mutations on ARM: GB10 installs require
+# the complete, versioned offline installer image.
+if [[ $(uname -m) != "x86_64" ]]; then
+  echo -e "\e[31mOmarchy online installation is unavailable on ARM. Use the complete GB10 installer image.\e[0m" >&2
+  exit 1
+fi
+
 # Set install mode to online since boot.sh is used for curl installations
 export OMARCHY_ONLINE_INSTALL=true
 
@@ -14,7 +24,7 @@ ansi_art='                 ▄▄▄
  ▀█████▀    ▀█   ███   █▀   ███   █▀   ███   ███  ███████▀   ███   █▀    ▀█████▀
                                        ███   █▀                                  '
 
-clear
+clear || true
 echo -e "\n$ansi_art\n"
 
 # Use custom branch if instructed, otherwise default to master

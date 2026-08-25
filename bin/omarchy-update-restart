@@ -2,6 +2,9 @@
 
 # omarchy:summary=Prompt for required reboot or service restarts after updates
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Post-update restart handling" || exit 1
+
 echo
 
 confirm_reboot() {

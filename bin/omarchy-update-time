@@ -3,5 +3,8 @@
 # omarchy:summary=Restart system time synchronization
 # omarchy:requires-sudo=true
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Time synchronization restart" || exit 1
+
 echo "Updating time..."
 sudo systemctl restart systemd-timesyncd

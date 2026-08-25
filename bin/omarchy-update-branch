@@ -5,6 +5,9 @@
 
 set -e
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Omarchy branch updates" || exit 1
+
 if (($# == 0)); then
   echo "Usage: omarchy-update-branch [master|dev]"
   exit 1

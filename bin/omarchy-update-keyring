@@ -3,6 +3,9 @@
 # omarchy:summary=Ensure the Omarchy and Arch keyring packages are installed and populated
 # omarchy:requires-sudo=true
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Keyring updates" || exit 1
+
 if omarchy-pkg-missing omarchy-keyring || ! sudo pacman-key --list-keys 40DFB630FF42BCFFB047046CF0134EE680CAC571 &>/dev/null; then
   sudo pacman-key --recv-keys 40DFB630FF42BCFFB047046CF0134EE680CAC571 --keyserver keys.openpgp.org
   sudo pacman-key --lsign-key 40DFB630FF42BCFFB047046CF0134EE680CAC571
@@ -18,5 +21,11 @@ fi
 # Ensure we have the latest archlinux-keyring, maintainer keys might have changed
 # Always reinstall, as the keyring can be updated without a package version bump.
 echo -e "\e[32m\nUpdate Arch signing keys\e[0m"
-sudo pacman -Sy --noconfirm archlinux-keyring >/dev/null 2> >(grep -vE '^warning: archlinux-keyring-[^ ]+ is up to date -- reinstalling$' >&2)
+if [[ $(uname -m) == aarch64 ]]; then
+  arch_keyring=archlinuxarm-keyring
+else
+  arch_keyring=archlinux-keyring
+fi
+sudo pacman -Sy --noconfirm "$arch_keyring" >/dev/null \
+  2> >(grep -vE "^warning: ${arch_keyring}-[^ ]+ is up to date -- reinstalling$" >&2)
 echo "Keys are correct"

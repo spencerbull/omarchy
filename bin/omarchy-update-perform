@@ -5,6 +5,9 @@
 
 set -e
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "The Omarchy update pipeline" || exit 1
+
 # Ensure screensaver/sleep doesn't set in during updates
 hyprctl dispatch 'hl.dsp.window.tag({ tag = "+noidle" })' &>/dev/null || hyprctl dispatch tagwindow +noidle &>/dev/null || true
 
@@ -21,8 +24,10 @@ omarchy-update-analyze-logs
 
 # Updates stay on the v3 tag series, so say how to get to Quattro. This has to
 # come before omarchy-update-restart, which may reboot the moment it is answered.
-echo
-echo -e "\e[33mYou're still running an older version of Omarchy. To upgrade to Omarchy Quattro, you'll need to run \e[1momarchy upgrade-to-quattro\e[0m\e[33m manually.\e[0m"
+if ! omarchy-hw-nvidia-gb10; then
+  echo
+  echo -e "\e[33mYou're still running an older version of Omarchy. To upgrade to Omarchy Quattro, you'll need to run \e[1momarchy upgrade-to-quattro\e[0m\e[33m manually.\e[0m"
+fi
 
 omarchy-update-restart
 

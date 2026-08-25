@@ -2,6 +2,9 @@
 
 # omarchy:summary=Run all pending migrations to bring the system in line with the installed version.
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Omarchy migrations" || exit 1
+
 STATE_DIR="$HOME/.local/state/omarchy/migrations"
 mkdir -p "$STATE_DIR"
 

@@ -21,9 +21,19 @@ if (( EUID == 0 )); then
   abort "Running as root (not user)"
 fi
 
-# Must be x86 only to fully work
+# Must be x86 or an exact NVIDIA GB10 match to fully work
 if [[ $(uname -m) != "x86_64" ]]; then
-  abort "x86_64 CPU"
+  if ! omarchy-hw-nvidia-gb10; then
+    echo -e "\e[31mOmarchy install is unsupported on this architecture. Only x86_64 and the exact NVIDIA GB10 platform are accepted.\e[0m"
+    exit 1
+  fi
+
+  # GB10 depends on the AArch64 package closure bundled in its installer. The
+  # public Omarchy repositories do not currently provide that closure.
+  if [[ -n ${OMARCHY_ONLINE_INSTALL:-} || ${OMARCHY_CHROOT_INSTALL:-} != 1 ]]; then
+    echo -e "\e[31mGB10 requires the complete Omarchy installer image; direct and online installs are not available.\e[0m"
+    exit 1
+  fi
 fi
 
 # Must have secure boot disabled

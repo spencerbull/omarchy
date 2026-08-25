@@ -4,6 +4,10 @@
 # omarchy:requires-sudo=true
 
 set -e
+
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Firmware updates" || exit 1
+
 echo -e "\e[32mUpdate Firmware\e[0m"
 
 if omarchy-cmd-missing fwupdmgr; then

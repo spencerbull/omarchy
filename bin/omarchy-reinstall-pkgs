@@ -5,6 +5,9 @@
 
 set -e
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Default-package reinstall" || exit 1
+
 # Reinstall all default Omarchy packages from the stable channel and downgrade any packages that are too new.
 
 # Set the package repository to the stable mirrors

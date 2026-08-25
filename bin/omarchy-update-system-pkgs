@@ -5,5 +5,8 @@
 
 set -e
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "System package updates" || exit 1
+
 echo -e "\e[32m\nUpdate system packages\e[0m"
 sudo pacman -Syyu --noconfirm

@@ -3,6 +3,9 @@
 # omarchy:summary=Set the branch for Omarchy's git repository.
 # omarchy:args=<master|rc|dev>
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Omarchy branch switching" || exit 1
+
 if (($# == 0)); then
   echo "Usage: omarchy-branch-set [master|rc|dev]"
   exit 1

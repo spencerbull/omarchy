@@ -1,11 +1,26 @@
-if lspci | grep -qi 'nvidia'; then
-  # Check which kernel is installed and set appropriate headers package
-  KERNEL_HEADERS="$(pacman -Qqs '^linux(-zen|-lts|-hardened)?$' | head -1)-headers"
+is_gb10=0
+if [[ $(uname -m) == aarch64 ]]; then
+  if ! omarchy-hw-nvidia-gb10; then
+    echo "Error: exact GB10 hardware evidence disappeared before NVIDIA driver installation" >&2
+    return 1
+  fi
+  is_gb10=1
+fi
 
-  if omarchy-hw-nvidia-gsp; then
+if (( is_gb10 )) || lspci | grep -qi 'nvidia'; then
+  if (( is_gb10 )); then
+    KERNEL_HEADERS="linux-gb10-headers"
+    PACKAGES=(nvidia-open-dkms=610.57.04-1 nvidia-utils=610.57.04-1 libva-nvidia-driver)
+    GPU_ARCH="turing_plus"
+  else
+    # Check which kernel is installed and set appropriate headers package
+    KERNEL_HEADERS="$(pacman -Qqs '^linux(-zen|-lts|-hardened)?$' | head -1)-headers"
+  fi
+
+  if (( ! is_gb10 )) && omarchy-hw-nvidia-gsp; then
     PACKAGES=(nvidia-open-dkms nvidia-utils lib32-nvidia-utils libva-nvidia-driver)
     GPU_ARCH="turing_plus"
-  elif omarchy-hw-nvidia-without-gsp; then
+  elif (( ! is_gb10 )) && omarchy-hw-nvidia-without-gsp; then
     PACKAGES=(nvidia-580xx-dkms nvidia-580xx-utils lib32-nvidia-580xx-utils)
     GPU_ARCH="maxwell_pascal_volta"
   fi
@@ -15,7 +30,18 @@ if lspci | grep -qi 'nvidia'; then
     exit 0
   fi
 
-  omarchy-pkg-add "$KERNEL_HEADERS" "${PACKAGES[@]}"
+  if ! omarchy-pkg-add "$KERNEL_HEADERS" "${PACKAGES[@]}"; then
+    echo "Error: failed to install the NVIDIA driver transaction" >&2
+    return 1
+  fi
+  if (( is_gb10 )); then
+    if [[ $(pacman -Q nvidia-open-dkms 2>/dev/null | awk '{print $2}') != 610.57.04-1 ]] ||
+      [[ $(pacman -Q nvidia-utils 2>/dev/null | awk '{print $2}') != 610.57.04-1 ]] ||
+      ! pacman -Q linux-gb10-headers libva-nvidia-driver >/dev/null; then
+      echo "Error: the validated GB10 NVIDIA driver transaction is incomplete" >&2
+      return 1
+    fi
+  fi
 
   # Configure modprobe for early KMS
   sudo tee /etc/modprobe.d/nvidia.conf <<EOF >/dev/null

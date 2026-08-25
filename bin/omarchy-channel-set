@@ -4,6 +4,9 @@
 # omarchy:args=<stable|rc|edge|dev>
 # omarchy:requires-sudo=true
 
+source "$OMARCHY_PATH/install/helpers/gb10-lifecycle.sh"
+omarchy-guard-gb10-lifecycle "Omarchy channel switching" || exit 1
+
 if (($# == 0)); then
   echo "Usage: omarchy-channel-set [stable|rc|edge|dev]"
   exit 1

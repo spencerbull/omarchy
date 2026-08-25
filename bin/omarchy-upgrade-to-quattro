@@ -5,6 +5,11 @@
 # omarchy:examples=omarchy upgrade to quattro | omarchy upgrade to quattro --dev
 # omarchy:requires-sudo=true
 
+if [[ $(uname -m) != x86_64 ]]; then
+  echo "The Omarchy Quattro migration is not available on AArch64."
+  exit 1
+fi
+
 set -euo pipefail
 
 usage() {

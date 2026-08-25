@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# omarchy:summary=Detect an NVIDIA GB10 system using its SoC and PCI IDs.
+
+machine=$(uname -m)
+sysfs_root=/sys
+
+[[ $machine == "aarch64" ]] || exit 1
+
+soc_id_path="$sysfs_root/devices/soc0/soc_id"
+[[ -r $soc_id_path ]] || exit 1
+[[ $(<"$soc_id_path") == "jep106:0426:8901" ]] || exit 1
+
+for device_path in "$sysfs_root"/bus/pci/devices/*; do
+  [[ -d $device_path ]] || continue
+  [[ -r $device_path/vendor && -r $device_path/device ]] || continue
+
+  if [[ $(<"$device_path/vendor") == "0x10de" && $(<"$device_path/device") == "0x2e12" ]]; then
+    exit 0
+  fi
+done
+
+exit 1

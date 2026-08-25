@@ -74,6 +74,10 @@ restore_outputs() {
 
 # Error handler
 catch_errors() {
+  # Capture the triggering status before any guard or assignment overwrites it.
+  local trap_exit_code=$?
+  local exit_code=${1:-$trap_exit_code}
+
   # Prevent recursive error handling
   if [[ $ERROR_HANDLING == "true" ]]; then
     return
@@ -81,8 +85,9 @@ catch_errors() {
     ERROR_HANDLING=true
   fi
 
-  # Store exit code immediately before it gets overwritten
-  local exit_code=$?
+  # Remove the temporary installer policy immediately on errors and signals;
+  # the EXIT handler repeats this as defense in depth.
+  cleanup_chroot_installer_sudoers || true
 
   stop_log_output
   restore_outputs
@@ -142,17 +147,58 @@ catch_errors() {
   done
 }
 
+cleanup_installer_sudoers_path() {
+  local policy_path=$1
+
+  rm -f -- "$policy_path" || return 1
+  [[ ! -e $policy_path ]]
+}
+
+# Never leave the ISO's temporary unrestricted sudo policy in the installed
+# target, including before the target-side install starts or when a late stage
+# fails. The ISO marker is exported before the live helper traps are sourced.
+cleanup_chroot_installer_sudoers() {
+  local cleanup_failed=0
+
+  if [[ ${OMARCHY_CHROOT_INSTALL:-} == 1 ]]; then
+    if [[ -e /etc/sudoers.d/99-omarchy-installer ]]; then
+      if ! sudo -n rm -f /etc/sudoers.d/99-omarchy-installer >/dev/null 2>&1 ||
+        [[ -e /etc/sudoers.d/99-omarchy-installer ]]; then
+        echo "Failed to remove /etc/sudoers.d/99-omarchy-installer" >&2
+        cleanup_failed=1
+      fi
+    fi
+  fi
+
+  if [[ ${OMARCHY_ISO_INSTALL:-} == 1 ]]; then
+    if ! cleanup_installer_sudoers_path /mnt/etc/sudoers.d/99-omarchy-installer; then
+      echo "Failed to remove /mnt/etc/sudoers.d/99-omarchy-installer" >&2
+      cleanup_failed=1
+    fi
+  fi
+
+  return "$cleanup_failed"
+}
+
 # Exit handler - ensures cleanup happens on any exit
 exit_handler() {
   local exit_code=$?
 
+  local cleanup_exit_code=0
+  cleanup_chroot_installer_sudoers || cleanup_exit_code=$?
+  if (( exit_code == 0 && cleanup_exit_code != 0 )); then
+    exit_code=$cleanup_exit_code
+  fi
+
   # Only run if we're exiting with an error and haven't already handled it
   if (( exit_code != 0 )) && [[ $ERROR_HANDLING != "true" ]]; then
-    catch_errors
+    catch_errors "$exit_code"
   else
     stop_log_output
     show_cursor
   fi
+
+  return "$exit_code"
 }
 
 # Set up traps

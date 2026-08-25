@@ -1,3 +1,8 @@
+if [[ $(uname -m) == aarch64 ]] && ! omarchy-hw-nvidia-gb10; then
+  echo "Error: exact GB10 hardware evidence disappeared before Limine finalization" >&2
+  return 1
+fi
+
 if command -v limine &>/dev/null; then
   sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf <<EOF >/dev/null
 HOOKS=(base udev plymouth keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck btrfs-overlayfs)
@@ -94,9 +99,38 @@ if ! grep -q "^/+" /boot/limine.conf; then
   exit 1
 fi
 
+if [[ $(uname -m) == aarch64 ]]; then
+  if ! omarchy-hw-nvidia-gb10; then
+    echo "Error: exact GB10 hardware evidence disappeared before Limine validation" >&2
+    return 1
+  fi
+  for required_limine_binary in \
+    /boot/EFI/limine/limine_aa64.efi \
+    /boot/EFI/BOOT/BOOTAA64.EFI; do
+    if [[ ! -f $required_limine_binary ]]; then
+      echo "Error: GB10 Limine deployment did not create $required_limine_binary" >&2
+      exit 1
+    fi
+  done
+fi
+
 if [[ -n $EFI ]] && efibootmgr &>/dev/null; then
-  # Remove the archinstall-created Limine entry
-  while IFS= read -r bootnum; do
-    sudo efibootmgr -b "$bootnum" -B >/dev/null 2>&1
-  done < <(efibootmgr | grep -E "^Boot[0-9]{4}\*? Arch Linux Limine" | sed 's/^Boot\([0-9]\{4\}\).*/\1/')
+  replacement_entry_ready=true
+  if [[ $(uname -m) == aarch64 ]]; then
+    if ! omarchy-hw-nvidia-gb10; then
+      echo "Error: exact GB10 hardware evidence disappeared before NVRAM validation" >&2
+      return 1
+    fi
+    if ! efibootmgr | grep -Fiq '\EFI\limine\limine_aa64.efi'; then
+      replacement_entry_ready=false
+      echo "Warning: keeping the Archinstall Limine NVRAM entry because the GB10 replacement entry was not verified." >&2
+    fi
+  fi
+
+  if [[ $replacement_entry_ready == true ]]; then
+    # Remove the Archinstall-created entry only after its replacement is proven.
+    while IFS= read -r bootnum; do
+      sudo efibootmgr -b "$bootnum" -B >/dev/null 2>&1
+    done < <(efibootmgr | grep -E "^Boot[0-9]{4}\*? Arch Linux Limine" | sed 's/^Boot\([0-9]\{4\}\).*/\1/')
+  fi
 fi
