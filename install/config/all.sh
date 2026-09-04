@@ -40,7 +40,9 @@ run_logged $OMARCHY_INSTALL/config/hardware/printer.sh
 run_logged $OMARCHY_INSTALL/config/hardware/usb-autosuspend.sh
 run_logged $OMARCHY_INSTALL/config/hardware/ignore-power-button.sh
 run_logged $OMARCHY_INSTALL/config/hardware/nvidia/gb10-kernel.sh
+run_logged $OMARCHY_INSTALL/config/hardware/nvidia/n1x-kernel.sh
 run_logged $OMARCHY_INSTALL/config/hardware/nvidia.sh
+run_logged $OMARCHY_INSTALL/config/hardware/nvidia/n1x-recovery.sh
 run_logged $OMARCHY_INSTALL/config/hardware/vulkan.sh
 
 run_logged $OMARCHY_INSTALL/config/hardware/intel/video-acceleration.sh

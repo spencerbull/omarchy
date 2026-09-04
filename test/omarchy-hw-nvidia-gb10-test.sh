@@ -93,17 +93,19 @@ pass "production detection always reads real uname and sysfs"
 
 (
   export HOME="$FIXTURE/home"
+  export OMARCHY_ARM_IMAGE_INSTALL=1
+  export OMARCHY_ARM_PLATFORM=n1x
   mkdir -p "$HOME/.config/hypr"
   : > "$HOME/.config/hypr/envs.lua"
 
   uname() { printf '%s\n' aarch64; }
-  omarchy-hw-nvidia-gb10() { return 0; }
+  omarchy-hw-nvidia-gb10() { return 1; }
   omarchy-pkg-add() { printf '%s\n' "$*" > "$FIXTURE/nvidia-packages"; }
   pacman() {
     case "$*" in
       '-Q nvidia-open-dkms') printf 'nvidia-open-dkms 610.57.04-1\n' ;;
       '-Q nvidia-utils') printf 'nvidia-utils 610.57.04-1\n' ;;
-      '-Q linux-gb10-headers libva-nvidia-driver') return 0 ;;
+      '-Q linux-n1x-headers libva-nvidia-driver') return 0 ;;
       *) return 1 ;;
     esac
   }
@@ -117,13 +119,15 @@ pass "production detection always reads real uname and sysfs"
 
   source "$ROOT/install/config/hardware/nvidia.sh"
 )
-[[ $(<"$FIXTURE/nvidia-packages") == "linux-gb10-headers nvidia-open-dkms=610.57.04-1 nvidia-utils=610.57.04-1 libva-nvidia-driver" ]] \
-  || fail "selects the native GB10 NVIDIA driver pair without lib32 packages"
-pass "selects the native GB10 NVIDIA driver pair without lib32 packages"
+[[ $(<"$FIXTURE/nvidia-packages") == "linux-n1x-headers nvidia-open-dkms=610.57.04-1 nvidia-utils=610.57.04-1 libva-nvidia-driver" ]] \
+  || fail "selects the native N1x NVIDIA driver pair without lib32 packages"
+pass "selects the native N1x NVIDIA driver pair without lib32 packages"
 
 (
+  export OMARCHY_ARM_IMAGE_INSTALL=1
+  export OMARCHY_ARM_PLATFORM=gb10
   uname() { printf '%s\n' aarch64; }
-  omarchy-hw-nvidia-gb10() { return 0; }
+  omarchy-hw-nvidia-gb10() { return 1; }
   omarchy-pkg-add() { printf '%s\n' "$*" > "$FIXTURE/kernel-add"; }
   omarchy-pkg-drop() { printf '%s\n' "$*" > "$FIXTURE/kernel-drop"; }
   pacman() {
@@ -145,9 +149,36 @@ pass "selects the native GB10 NVIDIA driver pair without lib32 packages"
   || fail "drops the generic kernel only on GB10"
 pass "installs GB10 kernel pair and drops the generic kernel"
 
-if (
+(
+  export OMARCHY_ARM_IMAGE_INSTALL=1
+  export OMARCHY_ARM_PLATFORM=n1x
   uname() { printf '%s\n' aarch64; }
-  omarchy-hw-nvidia-gb10() { return 0; }
+  omarchy-pkg-add() { printf '%s\n' "$*" > "$FIXTURE/n1x-kernel-add"; }
+  omarchy-pkg-drop() { printf '%s\n' "$*" > "$FIXTURE/n1x-kernel-drop"; }
+  pacman() {
+    [[ $* == '-Q linux-n1x linux-n1x-headers' ]]
+  }
+  sudo() {
+    if [[ $1 == tee ]]; then
+      command cat >/dev/null
+    else
+      return 0
+    fi
+  }
+
+  source "$ROOT/install/config/hardware/nvidia/n1x-kernel.sh"
+)
+[[ $(<"$FIXTURE/n1x-kernel-add") == "linux-n1x linux-n1x-headers" ]] \
+  || fail "installs the N1x kernel and headers"
+[[ $(<"$FIXTURE/n1x-kernel-drop") == "linux linux-headers" ]] \
+  || fail "drops the generic kernel only after N1x installation"
+pass "installs N1x kernel pair and drops the generic kernel"
+
+if (
+  export OMARCHY_ARM_IMAGE_INSTALL=1
+  export OMARCHY_ARM_PLATFORM=gb10
+  uname() { printf '%s\n' aarch64; }
+  omarchy-hw-nvidia-gb10() { return 1; }
   omarchy-pkg-add() { return 1; }
   omarchy-pkg-drop() { printf 'unexpected\n' >"$FIXTURE/kernel-drop-on-failure"; }
   source "$ROOT/install/config/hardware/nvidia/gb10-kernel.sh"
@@ -159,28 +190,30 @@ pass "keeps the generic kernel and fails the stage on transaction failure"
 
 if (
   uname() { printf '%s\n' aarch64; }
-  omarchy-hw-nvidia-gb10() { return 1; }
-  omarchy-pkg-add() { printf 'unexpected\n' >"$FIXTURE/kernel-add-on-detector-loss"; }
+  export OMARCHY_ARM_PLATFORM=gb10
+  omarchy-hw-nvidia-gb10() { return 0; }
+  omarchy-pkg-add() { printf 'unexpected\n' >"$FIXTURE/kernel-add-without-authorization"; }
   source "$ROOT/install/config/hardware/nvidia/gb10-kernel.sh"
 ); then
-  fail "kernel transition succeeds after exact GB10 evidence disappears"
+  fail "kernel transition succeeds without ARM image authorization"
 fi
-[[ ! -e $FIXTURE/kernel-add-on-detector-loss ]] || fail "kernel transition mutates after detector loss"
+[[ ! -e $FIXTURE/kernel-add-without-authorization ]] || fail "kernel transition mutates without ARM image authorization"
 
 if (
   uname() { printf '%s\n' aarch64; }
-  omarchy-hw-nvidia-gb10() { return 1; }
-  omarchy-pkg-add() { printf 'unexpected\n' >"$FIXTURE/nvidia-add-on-detector-loss"; }
+  export OMARCHY_ARM_PLATFORM=n1x
+  omarchy-hw-nvidia-gb10() { return 0; }
+  omarchy-pkg-add() { printf 'unexpected\n' >"$FIXTURE/nvidia-add-without-authorization"; }
   source "$ROOT/install/config/hardware/nvidia.sh"
 ); then
-  fail "NVIDIA stage succeeds after exact GB10 evidence disappears"
+  fail "NVIDIA stage succeeds without ARM image authorization"
 fi
-[[ ! -e $FIXTURE/nvidia-add-on-detector-loss ]] || fail "NVIDIA stage mutates after detector loss"
-pass "fails mandatory AArch64 hardware stages when exact GB10 evidence disappears"
+[[ ! -e $FIXTURE/nvidia-add-without-authorization ]] || fail "NVIDIA stage mutates without ARM image authorization"
+pass "requires explicit image authorization for mandatory AArch64 stages"
 
-grep -Fq 'direct and online installs are not available' "$ROOT/install/preflight/guard.sh" \
-  || fail "GB10 direct and online installs are rejected"
-pass "rejects incomplete GB10 direct and online installs"
+grep -Fq 'authorized development installer image' "$ROOT/install/preflight/guard.sh" \
+  || fail "AArch64 direct and online installs are rejected"
+pass "rejects incomplete AArch64 direct and online installs"
 
 boot_guard_line=$(grep -n -m1 'Omarchy online installation is unavailable on ARM' "$ROOT/boot.sh" | cut -d: -f1)
 boot_mutation_line=$(grep -n -m1 'sudo tee /etc/pacman.d/mirrorlist' "$ROOT/boot.sh" | cut -d: -f1)
@@ -189,9 +222,9 @@ if [[ -z $boot_guard_line || -z $boot_mutation_line || $boot_guard_line -ge $boo
 fi
 pass "rejects online ARM installation before bootstrap mutations"
 
-grep -Fq 'unsupported on this architecture' "$ROOT/install/preflight/guard.sh" \
-  || fail "unsupported AArch64 is rejected without the overridable abort helper"
-pass "hard-rejects unsupported AArch64 platforms"
+grep -Fq 'OMARCHY_ARM_IMAGE_INSTALL' "$ROOT/install/preflight/guard.sh" \
+  || fail "AArch64 preflight omits explicit image authorization"
+pass "requires explicit AArch64 image authorization"
 
 for guarded_command in omarchy-channel-set omarchy-migrate omarchy-reinstall-pkgs omarchy-refresh-pacman omarchy-update omarchy-update-aur-pkgs omarchy-update-available-reset omarchy-update-branch omarchy-update-firmware omarchy-update-git omarchy-update-keyring omarchy-update-orphan-pkgs omarchy-update-perform omarchy-update-restart omarchy-update-system-pkgs omarchy-update-time omarchy-branch-set; do
   grep -Fq 'install/helpers/gb10-lifecycle.sh' "$ROOT/bin/$guarded_command" \
@@ -217,12 +250,26 @@ fi
 ) || fail "lifecycle guard rejects x86_64"
 pass "guards all public Omarchy Git and update lifecycle entry points"
 
-install_arch_guard_line=$(grep -n -m1 'exact NVIDIA GB10 platform are accepted' "$ROOT/install.sh" | cut -d: -f1)
+install_arch_guard_line=$(grep -n -m1 'OMARCHY_ARM_IMAGE_INSTALL' "$ROOT/install.sh" | cut -d: -f1)
 install_helper_line=$(grep -n -m1 'helpers/all.sh' "$ROOT/install.sh" | cut -d: -f1)
 if [[ -z $install_arch_guard_line || -z $install_helper_line || $install_arch_guard_line -ge $install_helper_line ]]; then
   fail "unsupported AArch64 is rejected before mutating installer helpers load"
 fi
 pass "rejects unsupported AArch64 before helper mutations"
+
+for unlocked_install_file in \
+  install.sh \
+  install/preflight/guard.sh \
+  install/config/hardware/nvidia.sh \
+  install/config/hardware/nvidia/gb10-kernel.sh \
+  install/config/hardware/nvidia/n1x-kernel.sh \
+  install/config/hardware/nvidia/n1x-recovery.sh \
+  install/login/limine-snapper.sh; do
+  if grep -Fq 'omarchy-hw-nvidia-gb10' "$ROOT/$unlocked_install_file"; then
+    fail "N1x install path remains locked to Coleman hardware in $unlocked_install_file"
+  fi
+done
+pass "does not classify the authorized N1x image as Coleman GB10 hardware"
 
 grep -Fq 'arch_keyring=archlinuxarm-keyring' "$ROOT/bin/omarchy-update-keyring" \
   || fail "updates the Arch Linux ARM keyring on GB10"
@@ -238,9 +285,88 @@ grep -Fq 'replacement_entry_ready' "$ROOT/install/login/limine-snapper.sh" \
   || fail "preserves Archinstall NVRAM entry until its replacement is verified"
 pass "validates AArch64 Limine deployment before removing the installer entry"
 
+grep -Fq 'mkinitcpio_hooks=${mkinitcpio_hooks/ plymouth/}' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "installed AArch64 initramfs still includes the crashing Plymouth hook"
+grep -Fq 'KERNEL_CMDLINE[default]+=" console=tty0 acpi=nospcr disablehooks=plymouth plymouth.enable=0 loglevel=7 ignore_loglevel systemd.show_status=1 rd.udev.log_level=info vt.global_cursor_default=1"' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "installed AArch64 Limine entry does not pin the panel console or still starts Plymouth"
+grep -Fq 'sed -i '"'"'/^KERNEL_CMDLINE\[default\]+=" quiet splash loglevel=0 /d'"'"' /etc/default/limine' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "installed AArch64 boot failures remain hidden by quiet defaults"
+if grep -Fq 'later values override the quiet defaults' "$ROOT/install/login/limine-snapper.sh"; then
+  fail "installer still assumes limine-entry-tool appends += lines in order"
+fi
+grep -Fq 'KERNEL_CMDLINE[linux-n1x-rescue]=' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x rescue entry inherits the normal cmdline through Limine load options"
+grep -Fq 'n1x_rescue_entry_cmdline) != "$N1X_RESCUE_CMDLINE"' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x rescue entry cmdline is not verified in /boot/limine.conf"
+grep -Fq 'an AArch64 Limine entry still boots quietly' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "generated AArch64 entries are not checked for quiet boot"
+plymouth_disable_line=$(grep -n -m1 'disablehooks=plymouth plymouth.enable=0' "$ROOT/install/login/limine-snapper.sh" | cut -d: -f1)
+limine_hook_install_line=$(grep -n -m1 'limine-snapper-sync limine-mkinitcpio-hook' "$ROOT/install/login/limine-snapper.sh" | cut -d: -f1)
+if [[ -z $plymouth_disable_line || -z $limine_hook_install_line || $plymouth_disable_line -ge $limine_hook_install_line ]]; then
+  fail "installed AArch64 Plymouth disablement runs after Limine UKI generation"
+fi
+pass "disables crashing Plymouth before installed AArch64 UKI generation"
+
+grep -Fq 'limine-entry-tool --add-uki linux-n1x-rescue' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x does not generate a compact rescue UKI"
+grep -Fq -- '--no-mutex --no-hooks' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x rescue UKI installation can recursively run boot hooks"
+if grep -Fq 'MKINITCPIO_FALLBACK=linux-n1x' "$ROOT/install/login/limine-snapper.sh"; then
+  fail "N1x still requests the oversized generic fallback initramfs"
+fi
+grep -Fq 'omarchy.n1x_recovery=1' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x diagnostic recovery has no boot marker"
+grep -Fq 'nomodeset module_blacklist=nvidia,nvidia_drm,nvidia_modeset,nvidia_uvm,nvidia_peermem,nouveau' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x diagnostic rescue does not blacklist NVIDIA"
+grep -Fq 'systemd.unit=multi-user.target console=tty0 fbcon=map:0 earlycon' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "N1x diagnostic rescue does not boot to the console target"
+grep -Fq 'MODULES+=(i2c_tegra i2c_hid i2c_hid_acpi hid_generic hid_multitouch usbhid)' "$ROOT/install/config/hardware/nvidia/n1x-kernel.sh" \
+  || fail "N1x installed initramfs does not preserve internal and USB keyboards"
+grep -Fq 'options nvidia_drm modeset=0' "$ROOT/install/config/hardware/nvidia.sh" \
+  || fail "N1x does not defer NVIDIA DRM modesetting"
+grep -Fq 'sudo rm -f /etc/mkinitcpio.conf.d/nvidia.conf' "$ROOT/install/config/hardware/nvidia.sh" \
+  || fail "N1x leaves forced NVIDIA initramfs modules enabled"
+grep -Fq 'chrootable_systemctl_enable sshd.service' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery does not enable SSH"
+grep -Fq 'PasswordAuthentication no' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery permits SSH password authentication"
+grep -Fq 'PermitRootLogin no' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery permits SSH root login"
+grep -Fq 'chrootable_systemctl_enable systemd-networkd.service' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery does not enable Ethernet DHCP"
+grep -Fq 'chrootable_systemctl_enable systemd-resolved.service' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery does not enable local hostname discovery"
+grep -Fq 'omarchy-n1x-probe.service' "$ROOT/install/config/hardware/nvidia/n1x-recovery.sh" \
+  || fail "N1x recovery does not install the automated hardware probe"
+pass "provides keyboard, conservative console, SSH, and hardware-probe recovery for N1x"
+
 grep -Fq 'bash -Ee -o pipefail' "$ROOT/install/helpers/logging.sh" \
   || fail "GB10 logged stages propagate command and pipeline failures"
 pass "propagates failures from every GB10 installer stage"
+
+grep -Fq 'snapper --no-dbus list-configs' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "Limine finalization still queries Snapper through unavailable D-Bus"
+grep -Fq 'snapper --no-dbus -c root create-config /' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "Limine finalization still creates the root config through unavailable D-Bus"
+pass "uses Snapper's direct backend before Limine finalization"
+
+grep -Fq 'log_lines < 8' "$ROOT/install/helpers/errors.sh" \
+  || fail "small installer consoles keep a visible failure-log tail"
+(
+  gum() { return 0; }
+  less() { printf '%s\n' "$*" >"$FIXTURE/debug-less-args"; }
+
+  source "$ROOT/install/helpers/errors.sh"
+  trap - ERR INT TERM EXIT
+
+  OMARCHY_INSTALL_LOG_FILE="$FIXTURE/omarchy-install.log"
+  printf '%s\n' "specific AArch64 image failure" >"$OMARCHY_INSTALL_LOG_FILE"
+  OMARCHY_INSTALL_DEBUG_LOGS=1
+  show_debug_log
+
+  [[ $(<"$FIXTURE/debug-less-args") == "-R +G -- $OMARCHY_INSTALL_LOG_FILE" ]]
+) || fail "AArch64 image diagnostic mode opens the complete installer log at its end"
+pass "shows complete AArch64 image failure logs in explicit diagnostic mode"
 
 grep -Fq 'cleanup_chroot_installer_sudoers' "$ROOT/install/helpers/errors.sh" \
   || fail "chroot install errors remove the temporary sudo policy"
@@ -267,16 +393,16 @@ pass "removes unrestricted installer sudo on all chroot exits"
 
 grep -Fq '$(uname -m) == aarch64' "$ROOT/install/config/hardware/nvidia/gb10-kernel.sh" \
   || fail "kernel stage selects mandatory AArch64 work by architecture"
-grep -Fq 'evidence disappeared before NVIDIA driver installation' "$ROOT/install/config/hardware/nvidia.sh" \
-  || fail "NVIDIA stage fails when exact GB10 evidence disappears"
-grep -Fq 'evidence disappeared before Limine validation' "$ROOT/install/login/limine-snapper.sh" \
-  || fail "Limine stage fails when exact GB10 evidence disappears"
-limine_guard_line=$(grep -n -m1 'evidence disappeared before Limine finalization' "$ROOT/install/login/limine-snapper.sh" | cut -d: -f1)
+grep -Fq 'authorization disappeared before NVIDIA driver installation' "$ROOT/install/config/hardware/nvidia.sh" \
+  || fail "NVIDIA stage fails when ARM image authorization disappears"
+grep -Fq 'authorization disappeared before Limine validation' "$ROOT/install/login/limine-snapper.sh" \
+  || fail "Limine stage fails when ARM image authorization disappears"
+limine_guard_line=$(grep -n -m1 'authorization disappeared before Limine finalization' "$ROOT/install/login/limine-snapper.sh" | cut -d: -f1)
 limine_mutation_line=$(grep -n -m1 'sudo tee /etc/mkinitcpio.conf.d/omarchy_hooks.conf' "$ROOT/install/login/limine-snapper.sh" | cut -d: -f1)
 if [[ -z $limine_guard_line || -z $limine_mutation_line || $limine_guard_line -ge $limine_mutation_line ]]; then
-  fail "Limine detector-loss guard runs after bootloader mutation"
+  fail "Limine authorization guard runs after bootloader mutation"
 fi
-pass "revalidates exact GB10 evidence in mandatory AArch64 stages"
+pass "revalidates ARM image authorization in mandatory AArch64 stages"
 
 grep -Fq 'clear || true' "$ROOT/boot.sh" \
   || fail "noninteractive x86 bootstrap tolerates an unset TERM"
