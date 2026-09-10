@@ -1,0 +1,231 @@
+$ omarchy-plugin-add /tmp/omagotchi-src --yes
+Cloning into '/home/omarchy/.config/omarchy/plugins/.add.tmp.6982'...
+done.
+Added slcode777.omagotchi into /home/omarchy/.config/omarchy/plugins/slcode777.omagotchi
+Review its requested access with: omarchy plugin review slcode777.omagotchi
+[exit 0]
+
+$ omarchy-plugin-list
+ID                               STATE     SOURCE      KINDS              NAME
+omarchy.active-window            disabled  first-party bar-widget         Active window
+omarchy.agents                   enabled   first-party bar-widget         Agents
+omarchy.audio                    enabled   first-party bar-widget         Audio
+omarchy.background               enabled   first-party service            Background
+omarchy.bar                      enabled   first-party bar                Bar
+omarchy.battery                  enabled   first-party service            Battery
+omarchy.bluetooth                enabled   first-party bar-widget         Bluetooth
+omarchy.clipboard                enabled   first-party overlay            Clipboard
+omarchy.clock                    enabled   first-party bar-widget         Clock
+omarchy.dev-gallery              enabled   first-party panel              Dev gallery
+omarchy.disk-speedtest           enabled   first-party panel              Disk speed test
+omarchy.dropbox                  disabled  first-party bar-widget         Dropbox
+omarchy.emojis                   enabled   first-party overlay            Emojis
+omarchy.idle                     enabled   first-party service            Idle
+omarchy.image-picker             enabled   first-party overlay            Image picker
+omarchy.indicators               enabled   first-party bar-widget         Indicators
+omarchy.keyboard-layout          enabled   first-party bar-widget         Keyboard layout
+omarchy.lock                     enabled   first-party service            Lock Screen
+omarchy.media                    disabled  first-party service,bar-widget Media
+omarchy.menu                     enabled   first-party menu,bar-widget    Omarchy menu
+omarchy.microphone               disabled  first-party bar-widget         Microphone
+omarchy.monitor                  enabled   first-party bar-widget         Display
+omarchy.network                  enabled   first-party bar-widget         Network
+omarchy.nightlight               enabled   first-party service            Night Light
+omarchy.notifications            enabled   first-party service            Notifications
+omarchy.osd                      enabled   first-party panel              On-screen display
+omarchy.plugin-review            enabled   first-party panel              Ward Access
+omarchy.polkit                   enabled   first-party service            Polkit Agent
+omarchy.power                    enabled   first-party bar-widget         Power
+omarchy.reminders                enabled   first-party overlay            Reminders
+omarchy.spacer                   disabled  first-party bar-widget         Spacer
+omarchy.speedtest                enabled   first-party panel              Speed Test
+omarchy.system-update            enabled   first-party bar-widget         Omarchy update
+omarchy.tailscale                disabled  first-party bar-widget         Tailscale
+omarchy.tray                     enabled   first-party bar-widget         System tray
+omarchy.weather                  enabled   first-party bar-widget         Weather
+omarchy.wifiqr                   enabled   first-party panel              Wi-Fi QR
+omarchy.workspaces               enabled   first-party bar-widget         Workspaces
+slcode777.omagotchi              disabled  third-party service,bar-widget Omagotchi
+[exit 0]
+
+$ omarchy-plugin-review slcode777.omagotchi
+Omagotchi (slcode777.omagotchi) — 0.1.0
+Revision: 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784
+
+Requested access:
+  Host executable checkupdates: /usr/bin/checkupdates
+    Lifetime: ten-second deadline
+    Required leaves: []
+    Command tree: {"end":"pending-updates","next":[]}
+    Uses existing host accounts, files and network; completed effects cannot be undone by revocation.
+  Host executable pacman: /usr/bin/pacman
+    Lifetime: ten-second deadline
+    Required leaves: []
+    Command tree: {"end":null,"next":[{"arg":{"kind":"exact","value":"-Qdtq"},"then":{"end":"orphan-packages","next":[]}}]}
+    Uses existing host accounts, files and network; completed effects cannot be undone by revocation.
+  Text-only notifications (optional)
+  Play audio on the default output; no recording (optional)
+  Desktop geometry: output/workspace layout and window rectangles; no titles or window control (optional)
+  Private persistent storage; saved data remains after revocation (optional)
+
+No plugin code was run. Requests are not grants.
+Approve this exact revision with:
+  omarchy plugin approve slcode777.omagotchi --revision 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784
+[exit 0]
+
+{"name":"checkupdates","executable":"/usr/bin/checkupdates","required":[],"lifetime":null}
+{"name":"pacman","executable":"/usr/bin/pacman","required":[],"lifetime":null}
+$ omarchy-plugin-review slcode777.omagotchi --ui
+[exit 0]
+
+screenshot 02-review-menu ok
+$ omarchy-plugin-approve slcode777.omagotchi --revision 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784 --allow-notifications --allow-storage --allow-desktop-geometry --allow-audio-playback --exec pacman:orphan-packages --exec checkupdates:pending-updates --yes
+Approved slcode777.omagotchi at 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784. No plugin was started.
+[exit 0]
+
+$ omarchy-plugin-list
+ID                               STATE     SOURCE      KINDS              NAME
+omarchy.active-window            disabled  first-party bar-widget         Active window
+omarchy.agents                   enabled   first-party bar-widget         Agents
+omarchy.audio                    enabled   first-party bar-widget         Audio
+omarchy.background               enabled   first-party service            Background
+omarchy.bar                      enabled   first-party bar                Bar
+omarchy.battery                  enabled   first-party service            Battery
+omarchy.bluetooth                enabled   first-party bar-widget         Bluetooth
+omarchy.clipboard                enabled   first-party overlay            Clipboard
+omarchy.clock                    enabled   first-party bar-widget         Clock
+omarchy.dev-gallery              enabled   first-party panel              Dev gallery
+omarchy.disk-speedtest           enabled   first-party panel              Disk speed test
+omarchy.dropbox                  disabled  first-party bar-widget         Dropbox
+omarchy.emojis                   enabled   first-party overlay            Emojis
+omarchy.idle                     enabled   first-party service            Idle
+omarchy.image-picker             enabled   first-party overlay            Image picker
+omarchy.indicators               enabled   first-party bar-widget         Indicators
+omarchy.keyboard-layout          enabled   first-party bar-widget         Keyboard layout
+omarchy.lock                     enabled   first-party service            Lock Screen
+omarchy.media                    disabled  first-party service,bar-widget Media
+omarchy.menu                     enabled   first-party menu,bar-widget    Omarchy menu
+omarchy.microphone               disabled  first-party bar-widget         Microphone
+omarchy.monitor                  enabled   first-party bar-widget         Display
+omarchy.network                  enabled   first-party bar-widget         Network
+omarchy.nightlight               enabled   first-party service            Night Light
+omarchy.notifications            enabled   first-party service            Notifications
+omarchy.osd                      enabled   first-party panel              On-screen display
+omarchy.plugin-review            enabled   first-party panel              Ward Access
+omarchy.polkit                   enabled   first-party service            Polkit Agent
+omarchy.power                    enabled   first-party bar-widget         Power
+omarchy.reminders                enabled   first-party overlay            Reminders
+omarchy.spacer                   disabled  first-party bar-widget         Spacer
+omarchy.speedtest                enabled   first-party panel              Speed Test
+omarchy.system-update            enabled   first-party bar-widget         Omarchy update
+omarchy.tailscale                disabled  first-party bar-widget         Tailscale
+omarchy.tray                     enabled   first-party bar-widget         System tray
+omarchy.weather                  enabled   first-party bar-widget         Weather
+omarchy.wifiqr                   enabled   first-party panel              Wi-Fi QR
+omarchy.workspaces               enabled   first-party bar-widget         Workspaces
+slcode777.omagotchi              approved  third-party service,bar-widget Omagotchi
+[exit 0]
+
+{"enabled":false,"approved":true,"revision":"965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784","grants":{"exec":["checkupdates","pacman"],"notifications":true,"storage":true,"desktopGeometry":true,"audioPlayback":true}}
+$ omarchy-plugin-enable slcode777.omagotchi
+omarchy-plugin-enable: host connection closed
+[exit 1]
+
+$ omarchy-shell shell pluginStatus slcode777.omagotchi
+{"state":"error","error":"host connection closed"}
+[exit 0]
+
+== journal since enable
+Sep 10 03:37:48 omabot-worker omarchy-shell[6115]:   WARN scene: QML IpcHandler at file:///home/omarchy/work/omarchy-pr-10974/shell/plugins/panels/network/Panel.qml[210:3]: Handler was registered but will not be used because another handler
+Sep 10 03:37:48 omabot-worker omarchy-shell[6115]:   WARN scene: QML IpcHandler at @Ui/Panel.qml[48:3]: Handler was registered but will not be used because another handler is registered for target omarchy.audio
+Sep 10 03:37:48 omabot-worker omarchy-shell[6115]:   WARN scene: QML IpcHandler at file:///home/omarchy/work/omarchy-pr-10974/shell/plugins/panels/monitor/Panel.qml[220:3]: Handler was registered but will not be used because another handler
+Sep 10 03:37:48 omabot-worker omarchy-shell[6115]:   WARN scene: QML IpcHandler at file:///home/omarchy/work/omarchy-pr-10974/shell/plugins/panels/power/Panel.qml[177:3]: Handler was registered but will not be used because another handler i
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: MESA-EGL: warning: egl: failed to create dri2 screen
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: MESA-EGL: warning: NEEDS EXTENSION: falling back to kms_swrast
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: KMS: DRM_IOCTL_MODE_CREATE_DUMB failed: Permission denied
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: KMS: DRM_IOCTL_MODE_CREATE_DUMB failed: Permission denied
+Sep 10 03:37:48 omabot-worker omarchy-ward[11874]: Error: Custom { kind: Other, error: "Permission denied (os error 13)" }
+Sep 10 03:37:49 omabot-worker systemd[618]: omarchy-ward-7aabff2aa26c84fd8c529932a243e5bb.service: Main process exited, code=exited, status=1/FAILURE
+Sep 10 03:37:49 omabot-worker systemd[618]: omarchy-ward-7aabff2aa26c84fd8c529932a243e5bb.service: Failed with result 'exit-code'.
+{"plugins":[],"bar":{"layout":{"left":[],"center":[],"right":[{"id":"slcode777.omagotchi","sandbox":true}]}}}
+$ omarchy-plugin-stop slcode777.omagotchi
+Stopped slcode777.omagotchi (approval kept enabled)
+[exit 0]
+
+$ omarchy-plugin-disable slcode777.omagotchi
+Disabled slcode777.omagotchi
+[exit 0]
+
+{"enabled":false,"approved":false}
+=== A. review panel screenshot
+$ omarchy-plugin-review slcode777.omagotchi --ui
+[exit 0]
+
+screenshot 01-review-panel ok
+=== B. identity downgrade: approve as Ward, then drop sandbox from the checkout
+$ omarchy-plugin-approve slcode777.omagotchi --revision 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784 --allow-notifications --yes
+Approved slcode777.omagotchi at 965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784. No plugin was started.
+[exit 0]
+
+$ jq del(.sandbox) manifest.json  # simulating a manual pull of a revision without the sandbox key
+$ omarchy-shell shell rescanPlugins
+[exit 0]
+
+$ omarchy-plugin-enable slcode777.omagotchi
+omarchy-plugin-enable: host connection closed
+[exit 1]
+
+{"enabled":false,"active":false}
+$ omarchy-ward-runtime list (approval record still present)
+{"approved":true,"revision":"965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784"}
+screenshot 04-inprocess-after-downgrade ok
+shell log for in-process load:
+Sep 10 03:38:41 omabot-worker omarchy-shell[6115]:  DEBUG qml: Local plugin changed, reloading: slcode777.omagotchi
+$ omarchy-plugin-disable slcode777.omagotchi
+Disabled slcode777.omagotchi
+[exit 0]
+
+=== C. stock machine: native binary absent
+$ omarchy-plugin-list
+omarchy-ward-runtime: native sandbox runtime is not installed; set OMARCHY_WARD_HOST to an explicitly built development binary
+[exit 1]
+
+$ omarchy-plugin-disable slcode777.omagotchi
+omarchy-ward-runtime: native sandbox runtime is not installed; set OMARCHY_WARD_HOST to an explicitly built development binary
+[exit 1]
+
+$ omarchy-plugin-remove slcode777.omagotchi --yes
+omarchy-ward-runtime: native sandbox runtime is not installed; set OMARCHY_WARD_HOST to an explicitly built development binary
+[exit 1]
+
+/home/omarchy/.config/omarchy/plugins/slcode777.omagotchi
+=== B2. identity downgrade with no config marker (approved, never enabled)
+$ jq [.plugins,.bar.layout] shell.json  # no sandbox marker for the plugin
+[[],{"left":[],"center":[],"right":[]}]
+{"approved":true,"revision":"965fbaeb36b1408bceb3dbfd8886f14654c957291f57d2442f6b68cbf72ef784"}
+$ jq del(.sandbox) manifest.json  # a manual pull of a revision without the sandbox key
+$ omarchy-shell shell rescanPlugins
+[exit 0]
+
+$ omarchy-plugin-enable slcode777.omagotchi
+Enabled slcode777.omagotchi
+[exit 0]
+
+$ omarchy-shell shell listPlugins | jq (select slcode777.omagotchi)
+{"enabled":true,"active":false,"kinds":["service","bar-widget"]}
+[[],{"left":[],"center":[],"right":[{"id":"slcode777.omagotchi"}]}]
+screenshot 04-inprocess-after-downgrade ok
+$ journalctl (shell) since 1 min
+Sep 10 03:38:58 omabot-worker omarchy-shell[6115]:  DEBUG qml: Local plugin changed, reloading: slcode777.omagotchi
+Sep 10 03:39:21 omabot-worker omarchy-shell[6115]:  DEBUG qml: Local plugin changed, reloading: slcode777.omagotchi
+Sep 10 03:39:23 omabot-worker omarchy-shell[6115]:   WARN qml: service plugin load failed for slcode777.omagotchi: file:///home/omarchy/.config/omarchy/plugins/slcode777.omagotchi/Service.qml:4:1: module "qs.Ward" is not installed
+Sep 10 03:39:24 omabot-worker omarchy-shell[6115]:   WARN qml: service plugin load failed for slcode777.omagotchi: file:///home/omarchy/.config/omarchy/plugins/slcode777.omagotchi/Service.qml:4:1: module "qs.Ward" is not installed
+Sep 10 03:39:24 omabot-worker omarchy-shell[6115]:   WARN scene: QML QQuickImage at file:///home/omarchy/.config/omarchy/plugins/slcode777.omagotchi/PetSprite.qml[39:3]: Cannot open: file:///home/omarchy/.config/omarchy/plugins/slcode777.om
+Sep 10 03:39:24 omabot-worker omarchy-shell[6115]:   WARN qml: service plugin load failed for slcode777.omagotchi: file:///home/omarchy/.config/omarchy/plugins/slcode777.omagotchi/Service.qml:4:1: module "qs.Ward" is not installed
+$ pgrep -af omarchy-ward   # no controller: the plugin runs inside the shell
+15338 bash -c set +e; cd ~/work/omarchy-pr-10974; export OMARCHY_PATH=$PWD PATH=$PWD/bin:$PATH WAYLAND_DISPLAY=wayland-1 XDG_RUNTIME_DIR=/run/user/1000 HYPRLAND_INSTANCE_SIGNATURE=$(ls /run/user/1000/hypr | head -1); log=/tmp/evidence/cli.log; shot() { for i in 1 2 3; do hyprctl dispatch "hl.dsp.dpms({ on = true })" >/dev/null; sleep 1; timeout 8 grim "/tmp/evidence/$1.png" && { echo "screenshot $1 ok" | tee -a $log; return; }; done; echo "screenshot $1 FAILED" | tee -a $log; }; run() { echo "\$ $*" | tee -a $log; "$@" 2>&1 | tee -a $log; echo "[exit ${PIPESTATUS[0]}]" | tee -a $log; echo | tee -a $log; }; id=slcode777.omagotchi; m=~/.config/omarchy/plugins/$id/manifest.json; echo "=== B2. identity downgrade with no config marker (approved, never enabled)" | tee -a $log; echo "\$ jq [.plugins,.bar.layout] shell.json  # no sandbox marker for the plugin" | tee -a $log; jq -c "[.plugins, (.bar.layout|map_values(map(select(.id==\"$id\"))))]" ~/.config/omarchy/shell.json | tee -a $log; printf "{\"operation\":\"list\"}" | omarchy-ward-runtime | jq -c ".[] | select(.id==\"$id\") | {approved,revision}" | tee -a $log; jq "del(.sandbox)" /tmp/evidence/manifest.orig.json > $m; echo "\$ jq del(.sandbox) manifest.json  # a manual pull of a revision without the sandbox key" | tee -a $log; run omarchy-shell shell rescanPlugins; sleep 2; run omarchy-plugin-enable $id; sleep 6; echo "\$ omarchy-shell shell listPlugins | jq (select $id)" | tee -a $log; omarchy-shell shell listPlugins | jq -c ".[] | select(.id==\"$id\") | {enabled,active,kinds}" | tee -a $log; jq -c "[.plugins, (.bar.layout|map_values(map(select(.id==\"$id\"))))]" ~/.config/omarchy/shell.json | tee -a $log; shot 04-inprocess-after-downgrade; echo "\$ journalctl (shell) since 1 min" | tee -a $log; journalctl --user --no-pager --since "1 min ago" 2>/dev/null | grep -i "omagotchi" | tail -6 | cut -c1-240 | tee -a $log; echo "\$ pgrep -af omarchy-ward   # no controller: the plugin runs inside the shell" | tee -a $log; pgrep -af "omarchy-ward --controller" | tee -a $log; run omarchy-plugin-disable $id; cp /tmp/evidence/manifest.orig.json $m; omarchy-shell shell rescanPlugins >/dev/null
+$ omarchy-plugin-disable slcode777.omagotchi
+Disabled slcode777.omagotchi
+[exit 0]
+
