@@ -1,0 +1,110 @@
+=== build
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 35.26s
+[18/18] Linking CXX shared module Omarchy/Ward/libomarchy_plugin_viewplugin.so
+-- Installing: /home/omarchy/work/omarchy-pr-10974/lib/omarchy-ward
+staged omarchy-ward
+qml
+ward-runtime
+=== test/cli
+ok - a --help behind -- belongs to the command and still forwards
+ok - help lookalike tokens do not trigger help
+=== shell tests (changed)
+./test/shell.d/plugin-activation-test.sh: 42 passed, 0 failed, exit 0
+./test/shell.d/plugin-geometry-test.sh: 27 passed, 0 failed, exit 0
+./test/shell.d/plugin-input-test.sh: 65 passed, 0 failed, exit 0
+./test/shell.d/plugin-review-test.sh: 64 passed, 0 failed, exit 0
+./test/shell.d/plugin-grant-selection-test.sh: 108 passed, 0 failed, exit 0
+./test/shell.d/plugin-lifecycle-test.sh: 4 passed, 0 failed, exit 0
+./test/shell.d/network-qr-test.sh: 7 passed, 0 failed, exit 0
+./test/shell.d/launch-about-test.sh: 25 passed, 0 failed, exit 0
+./test/shell.d/locate-test.sh: 11 passed, 0 failed, exit 0
+./test/shell.d/menu-plugin-test.sh: 14 passed, 0 failed, exit 0
+./test/shell.d/plugin-registry-contract-test.sh: 1 passed, 0 failed, exit 0
+=== cargo test default
+     11 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      1 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      1 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+      1 test result: ok. 120 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.19s
+      1 test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      3 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      5 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      1 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      2 test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+=== cargo test opt-in
+unittests src/lib.rs result: FAILED. 123 passed; 2
+unittests src/main.rs result: ok. 1 passed; 0
+tests/controller.rs test ok. 2 passed; 0 failed;
+tests/exec.rs test ok. 3 passed; 0 failed;
+tests/focus.rs test FAILED. 0 passed; 2 failed;
+tests/fractional.rs test FAILED. 0 passed; 1 failed;
+tests/graphics.rs test FAILED. 0 passed; 1 failed;
+tests/host_job.rs test ok. 4 passed; 0 failed;
+tests/http.rs test ok. 3 passed; 0 failed;
+tests/media.rs test ok. 3 passed; 0 failed;
+tests/multi_output.rs test FAILED. 0 passed; 1 failed;
+tests/notification.rs test FAILED. 3 passed; 1 failed;
+tests/operation.rs test ok. 1 passed; 0 failed;
+tests/pen_test.rs test ok. 14 passed; 0 failed;
+tests/pen_test_blackbox.rs test ok. 7 passed; 0 failed;
+tests/qt.rs test FAILED. 0 passed; 1 failed;
+tests/quickshell_wall.rs test FAILED. 0 passed; 1 failed;
+tests/readback.rs test FAILED. 0 passed; 1 failed;
+tests/sandbox.rs test ok. 2 passed; 0 failed;
+tests/storage.rs test ok. 3 passed; 0 failed;
+tests/streams.rs test FAILED. 0 passed; 2 failed;
+tests/supervisor.rs test ok. 2 passed; 0 failed;
+tests/surfaces.rs test FAILED. 0 passed; 1 failed;
+tests/viewporter.rs test FAILED. 0 passed; 1 failed;
+tests/worker.rs test ok. 7 passed; 0 failed;
+result: ok. passed; 0 failed; 0 ignored;
+=== failures
+    admitted_quickshell_renders_and_receives_private_input
+    clicked_layer_may_enable_on_demand_focus_after_handling_the_click
+    fractional_scale_advertises_preferred_and_renders_crisp_with_logical_input
+    graphics::tests::configure_outputs_validates_the_requested_scales_physical_budget
+    graphics::tests::resize_waits_for_old_frame_and_cancels_pressed_input
+    mixed_dpi_output_streams_share_state_and_survive_hotplug_and_zero_outputs
+    native_quickshell_process_can_use_only_the_text_notification_helper
+    output_wall_enter_leave_reassign_remove_and_logical_input
+    private_layer_focus_obeys_activation_mode_and_unmapping
+    private_layers_preserve_focus_and_constrain_committed_popups
+    qt_bridge_renders_resizes_and_withdraws_after_revocation
+    quickshell_panel_lives_on_second_output_and_survives_wall_changes
+    repeated_readbacks_release_gpu_allocations
+    trusted_runtime_is_host_selected_read_only_and_independent_of_omarchy
+    viewport_crops_scales_and_hit_tests_transformed_surface
+=== worker suite specifically
+running 7 tests
+---- graphics::tests::configure_outputs_validates_the_requested_scales_physical_budget stdout ----
+thread 'graphics::tests::configure_outputs_validates_the_requested_scales_physical_budget' (26407) panicked at native/ward/src/graphics.rs:1802:78:
+---- graphics::tests::resize_waits_for_old_frame_and_cancels_pressed_input stdout ----
+thread 'graphics::tests::resize_waits_for_old_frame_and_cancels_pressed_input' (26458) panicked at native/ward/src/graphics.rs:1686:77:
+---- clicked_layer_may_enable_on_demand_focus_after_handling_the_click stdout ----
+thread 'clicked_layer_may_enable_on_demand_focus_after_handling_the_click' (31131) panicked at native/ward/tests/support/desktop.rs:110:71:
+---- private_layer_focus_obeys_activation_mode_and_unmapping stdout ----
+thread 'private_layer_focus_obeys_activation_mode_and_unmapping' (31141) panicked at native/ward/tests/support/desktop.rs:110:71:
+---- fractional_scale_advertises_preferred_and_renders_crisp_with_logical_input stdout ----
+thread 'fractional_scale_advertises_preferred_and_renders_crisp_with_logical_input' (31152) panicked at native/ward/tests/support/desktop.rs:137:71:
+---- admitted_quickshell_renders_and_receives_private_input stdout ----
+thread 'admitted_quickshell_renders_and_receives_private_input' (31164) panicked at native/ward/tests/graphics.rs:136:21:
+---- output_wall_enter_leave_reassign_remove_and_logical_input stdout ----
+thread 'output_wall_enter_leave_reassign_remove_and_logical_input' (31484) panicked at native/ward/tests/support/desktop.rs:137:71:
+---- native_quickshell_process_can_use_only_the_text_notification_helper stdout ----
+thread 'native_quickshell_process_can_use_only_the_text_notification_helper' (31495) panicked at native/ward/tests/notification.rs:607:38:
+---- qt_bridge_renders_resizes_and_withdraws_after_revocation stdout ----
+thread 'qt_bridge_renders_resizes_and_withdraws_after_revocation' (31780) panicked at native/ward/tests/support/desktop.rs:110:71:
+---- quickshell_panel_lives_on_second_output_and_survives_wall_changes stdout ----
+thread 'quickshell_panel_lives_on_second_output_and_survives_wall_changes' (31791) panicked at native/ward/tests/support/desktop.rs:137:71:
+---- repeated_readbacks_release_gpu_allocations stdout ----
+thread 'repeated_readbacks_release_gpu_allocations' (31802) panicked at native/ward/tests/support/desktop.rs:110:71:
+---- mixed_dpi_output_streams_share_state_and_survive_hotplug_and_zero_outputs stdout ----
+thread 'mixed_dpi_output_streams_share_state_and_survive_hotplug_and_zero_outputs' (31879) panicked at native/ward/tests/streams.rs:48:34:
+---- trusted_runtime_is_host_selected_read_only_and_independent_of_omarchy stdout ----
+thread 'trusted_runtime_is_host_selected_read_only_and_independent_of_omarchy' (31911) panicked at native/ward/tests/streams.rs:48:34:
+---- private_layers_preserve_focus_and_constrain_committed_popups stdout ----
+thread 'private_layers_preserve_focus_and_constrain_committed_popups' (32042) panicked at native/ward/tests/surfaces.rs:206:3:
+---- viewport_crops_scales_and_hit_tests_transformed_surface stdout ----
+thread 'viewport_crops_scales_and_hit_tests_transformed_surface' (32075) panicked at native/ward/tests/support/desktop.rs:110:71:
+=== fixture documentation + startup tests
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+DONE
