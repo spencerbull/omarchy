@@ -1,3 +1,5 @@
+> N1X development branch: see [N1X.md](N1X.md) for the matching repositories, build instructions, and hardware status.
+
 # Omarchy
 
 Omarchy is a beautiful, modern & opinionated Linux distribution by DHH.
