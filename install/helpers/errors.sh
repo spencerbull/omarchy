@@ -28,6 +28,12 @@ show_log_tail() {
     local log_lines=$((TERM_HEIGHT - LOGO_HEIGHT - 35))
     local max_line_width=$((LOGO_WIDTH - 4))
 
+    # Small consoles and large logos can leave this calculation at zero or
+    # below, hiding the only useful failure evidence.
+    if (( log_lines < 8 )); then
+      log_lines=8
+    fi
+
     tail -n $log_lines "$OMARCHY_INSTALL_LOG_FILE" | while IFS= read -r line; do
       if ((${#line} > max_line_width)); then
         local truncated_line="${line:0:$max_line_width}..."
@@ -40,6 +46,28 @@ show_log_tail() {
 
     echo
   fi
+}
+
+# In explicitly enabled diagnostic images, open the complete log at the
+# failure point. The normal installer keeps its existing compact error UI.
+show_debug_log() {
+  if [[ ${OMARCHY_INSTALL_DEBUG_LOGS:-} != 1 ]]; then
+    return
+  fi
+
+  echo
+  gum style --foreground 3 "AArch64 image debug mode: showing $OMARCHY_INSTALL_LOG_FILE"
+
+  if [[ ! -s $OMARCHY_INSTALL_LOG_FILE ]]; then
+    gum style --foreground 1 "No installer log is available at that path."
+  elif command -v less &>/dev/null; then
+    gum style "Use arrows or Page Up to inspect the failure; press q to return."
+    less -R +G -- "$OMARCHY_INSTALL_LOG_FILE" || true
+  else
+    tail -n 200 -- "$OMARCHY_INSTALL_LOG_FILE" || true
+  fi
+
+  echo
 }
 
 # Display the failed command or script name
@@ -100,6 +128,7 @@ catch_errors() {
 
   gum style "This command halted with exit code $exit_code:"
   show_failed_script_or_command
+  show_debug_log
 
   gum style "$QR_CODE"
   echo
